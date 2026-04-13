@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>MER - Modelo E-Commerce | PUC-SP Banco de Dados II</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #1a1a2e; color: #e0e0e0; }
+
+  .header {
+    background: linear-gradient(135deg, #16213e 0%, #0f3460 100%);
+    padding: 18px 30px;
+    border-bottom: 3px solid #e94560;
+    display: flex; align-items: center; gap: 20px;
+  }
+  .header h1 { font-size: 20px; color: #fff; }
+  .header span { font-size: 13px; color: #a0aec0; }
+  .badge { background: #e94560; color: #fff; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: bold; }
+
+  .legend {
+    display: flex; gap: 20px; padding: 10px 30px;
+    background: #16213e; font-size: 12px; flex-wrap: wrap;
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .dot { width: 12px; height: 12px; border-radius: 3px; }
+  .dot-pk { background: #f6c90e; }
+  .dot-fk { background: #4fc3f7; }
+  .dot-field { background: #81c784; }
+
+  #canvas-wrapper {
+    overflow: auto;
+    width: 100%;
+    height: calc(100vh - 100px);
+    position: relative;
+  }
+
+  svg#erd { display: block; }
+
+  .table-title { font-weight: bold; font-size: 13px; fill: #fff; }
+  .table-subtitle { font-size: 10px; fill: #a0aec0; }
+  .field-text { font-size: 11px; fill: #e0e0e0; }
+  .field-pk { font-size: 11px; fill: #f6c90e; font-weight: bold; }
+  .field-fk { font-size: 11px; fill: #4fc3f7; }
+  .field-type { font-size: 10px; fill: #9e9e9e; }
+
+  .rel-line { stroke: #546e7a; stroke-width: 1.5; fill: none; stroke-dasharray: none; }
+  .rel-label { font-size: 10px; fill: #78909c; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>🗄️ MER — Modelo Entidade-Relacionamento · E-Commerce</h1>
+    <span>PUC-SP · Faculdade de Ciências Exatas e Tecnologia · Banco de Dados II · Projeto 1</span>
+  </div>
+  <span class="badge">MySQL 8.x · InnoDB</span>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="dot dot-pk"></div> PK – Chave Primária</div>
+  <div class="legend-item"><div class="dot dot-fk"></div> FK – Chave Estrangeira</div>
+  <div class="legend-item"><div class="dot dot-field"></div> Campo regular</div>
+  <div class="legend-item">━━━ Relacionamento 1:N</div>
+  <div class="legend-item">━ ━ Relacionamento N:N (via tabela associativa)</div>
+</div>
+
+<div id="canvas-wrapper">
+<svg id="erd" width="2200" height="1700" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="arrowEnd" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#546e7a"/>
+    </marker>
+    <marker id="arrowStart" markerWidth="8" markerHeight="8" refX="2" refY="3" orient="auto-start-reverse">
+      <circle cx="3" cy="3" r="2.5" fill="#546e7a"/>
+    </marker>
+    <filter id="shadow">
+      <feDropShadow dx="2" dy="2" stdDeviation="3" flood-color="#000" flood-opacity="0.5"/>
+    </filter>
+  </defs>
+
+  <!-- ================================================================ -->
+  <!-- RELATIONSHIP LINES (draw first so tables appear on top)          -->
+  <!-- ================================================================ -->
+
+  <!-- tb_categoria pai -> filho -->
+  <path d="M 265 200 Q 340 200 340 230 Q 340 260 265 260" class="rel-line" marker-end="url(#arrowEnd)" stroke-dasharray="5,3"/>
+  <text x="345" y="232" class="rel-label">0..N</text>
+
+  <!-- tb_categoria -> tb_produto -->
+  <line x1="265" y1="242" x2="420" y2="580" class="rel-line" marker-end="url(#arrowEnd)"/>
+  <text x="300" y="430" class="rel-label">1:N</text>
+
+  <!-- tb_fornecedor -> tb_produto -->
+  <line x1="265" y1="530" x2="420" y2="620" class="rel-line" marker-end="url(#arrowEnd)"/>
+  <text x="320" y="590" class="rel-label">1:N</text>
+
+  <!-- tb_produto -> tb_produto_promocao -->
+  <line x1="770" y1="650" x2="780" y2="960" class="rel-line" stroke-dasharray="5,3" marker-end="url(#arrowEnd)"/>
+  <text x="778" y="820" class="rel-label">N:N</text>
+
+  <!-- tb_promocao -> tb_produto_promocao -->
+  <line x1="1020" y1="1000" x2="940" y2="1000" class="rel-line" stroke-dasharray="5,3" marker-end="url(#arrowEnd)"/>
+
+  <!-- tb_cliente -> tb_endereco -->
+  <line x1="1270" y1="330" x2="1270" y2="560" class="rel-line" marker-end="url(#arrowEnd)"/>
+  <text x="1278" y="455" class="rel-label">1:N</text>
+
+  <!-- tb_cliente -> tb_carrinho -->
+  <line x1="1480" y1="280" x2="1700" y2="280" class="rel-line" marker-end="url(#arrowEnd)"/>
+  <text x="1560" y="272" class="rel-label">1:N</text>
+
+  <!-- tb_carrinho -> tb_item_carrinho -->
+  <line x1="1850" y1="350" x2="1850" y2="520" class="rel-line" marker-end="url(#arrowEnd)"/>
+  <text x="1858" y="445" class="rel-label">1:N</text>
+
+  <!-- tb_produto -> tb_item_carrinho -->
+  <line x1="770" y1="640" x2="1700" y2="580" class="rel-line" marker-end="url(#arrowEnd)"/>
+
+  <!-- tb_cliente -> tb_pedido -->
+  <line x1="1350" y1="350" x2="900" y2="1120" class="rel-line" marker-end="url(#arrowEnd)"/>
+  <text x="1150" y="770" class="rel-label">1:N</text>
+
+  <!-- tb_endereco -> tb_pedido (entrega) -->
+  <line x1="1200" y1="720" x2="1050" y2="1120" class="rel-line" marker-end="url(#arrowEnd)" stroke="#4fc3f7" stroke-dasharray="4,2"/>
+  <text x="1110" y="930" class="rel-label" fill="#4fc3f7">end.entrega</text>
+
+  <!-- tb_promocao -> tb_pedido -->
+  <line x1="1170" y1="1020" x2="1060" y2="1150" class="rel-line" stroke-dasharray="4,2" marker-end="url(#arrowEnd)"/>
+
+  <!-- tb_pedido -> tb_item_pedido -->
+  <line x1="920" y1="1340" x2="600" y2="1420" class="rel-line" marker-end="url(#arrowEnd)"/>
+  <text x="740" y="1400" class="rel-label">1:N</text>
+
+  <!-- tb_produto -> tb_item_pedido -->
+  <line x1="595" y1="730" x2="510" y2="1420" class="rel-line" marker-end="url(#arrowEnd)"/>
+
+  <!-- tb_pedido -> tb_pagamento -->
+  <line x1="1060" y1="1260" x2="1270" y2="1200" class="rel-line" marker-end="url(#arrowEnd)"/>
+  <text x="1130" y="1210" class="rel-label">1:N</text>
+
+  <!-- tb_pedido -> tb_frete -->
+  <line x1="1060" y1="1200" x2="1550" y2="1150" class="rel-line" marker-end="url(#arrowEnd)"/>
+  <text x="1300" y="1160" class="rel-label">1:1</text>
+
+  <!-- tb_produto -> tb_avaliacao -->
+  <line x1="770" y1="700" x2="1700" y2="1420" class="rel-line" stroke="#9e9e9e" marker-end="url(#arrowEnd)"/>
+
+  <!-- tb_cliente -> tb_avaliacao -->
+  <line x1="1480" y1="380" x2="1870" y2="1420" class="rel-line" stroke="#9e9e9e" marker-end="url(#arrowEnd)"/>
+
+  <!-- tb_pedido -> tb_avaliacao -->
+  <line x1="1060" y1="1280" x2="1700" y2="1500" class="rel-line" stroke="#9e9e9e" marker-end="url(#arrowEnd)"/>
+
+  <!-- ================================================================ -->
+  <!-- TABLES                                                           -->
+  <!-- ================================================================ -->
+
+  <!-- ── tb_categoria ── -->
+  <g transform="translate(30, 130)" filter="url(#shadow)">
+    <rect width="240" height="200" rx="8" fill="#0d2137" stroke="#1565c0" stroke-width="2"/>
+    <rect width="240" height="32" rx="8" fill="#1565c0"/>
+    <rect y="24" width="240" height="8" fill="#1565c0"/>
+    <text x="12" y="20" class="table-title">tb_categoria</text>
+    <text x="12" y="52" class="field-pk">🔑 id_categoria     INT PK</text>
+    <text x="12" y="70" class="field-text">   nm_categoria    VARCHAR(100)</text>
+    <text x="12" y="88" class="field-text">   ds_categoria    VARCHAR(255)</text>
+    <text x="12" y="106" class="field-fk">🔗 id_categoria_pai INT FK</text>
+    <text x="12" y="124" class="field-text">   fl_ativo         TINYINT(1)</text>
+    <text x="12" y="142" class="field-text">   dt_criacao       DATETIME</text>
+    <text x="12" y="160" class="field-text">   dt_atualizacao   DATETIME</text>
+    <text x="12" y="185" class="table-subtitle">Auto-relacionamento (hierarquia)</text>
+  </g>
+
+  <!-- ── tb_fornecedor ── -->
+  <g transform="translate(30, 380)" filter="url(#shadow)">
+    <rect width="240" height="230" rx="8" fill="#0d2137" stroke="#1b5e20" stroke-width="2"/>
+    <rect width="240" height="32" rx="8" fill="#1b5e20"/>
+    <rect y="24" width="240" height="8" fill="#1b5e20"/>
+    <text x="12" y="20" class="table-title">tb_fornecedor</text>
+    <text x="12" y="52" class="field-pk">🔑 id_fornecedor    INT PK</text>
+    <text x="12" y="70" class="field-text">   nm_fornecedor   VARCHAR(150)</text>
+    <text x="12" y="88" class="field-text">   nm_fantasia     VARCHAR(150)</text>
+    <text x="12" y="106" class="field-text">   nr_cnpj          CHAR(14) UQ</text>
+    <text x="12" y="124" class="field-text">   nr_ie            VARCHAR(20)</text>
+    <text x="12" y="142" class="field-text">   ds_email         VARCHAR(100)</text>
+    <text x="12" y="160" class="field-text">   nr_telefone      VARCHAR(20)</text>
+    <text x="12" y="178" class="field-text">   ds_rua / nr_numero ...</text>
+    <text x="12" y="196" class="field-text">   nm_cidade / sg_uf / nr_cep</text>
+    <text x="12" y="214" class="field-text">   fl_ativo · dt_criacao</text>
+  </g>
+
+  <!-- ── tb_produto ── -->
+  <g transform="translate(420, 520)" filter="url(#shadow)">
+    <rect width="360" height="270" rx="8" fill="#0d2137" stroke="#6a1b9a" stroke-width="2"/>
+    <rect width="360" height="32" rx="8" fill="#6a1b9a"/>
+    <rect y="24" width="360" height="8" fill="#6a1b9a"/>
+    <text x="12" y="20" class="table-title">tb_produto</text>
+    <text x="12" y="52"  class="field-pk">🔑 id_produto        INT PK</text>
+    <text x="12" y="70"  class="field-fk">🔗 id_categoria      INT FK</text>
+    <text x="12" y="88"  class="field-fk">🔗 id_fornecedor     INT FK</text>
+    <text x="12" y="106" class="field-text">   cd_sku           VARCHAR(50) UQ</text>
+    <text x="12" y="124" class="field-text">   cd_barras        VARCHAR(20)</text>
+    <text x="12" y="142" class="field-text">   nm_produto       VARCHAR(200)</text>
+    <text x="12" y="160" class="field-text">   vl_custo / vl_preco   DECIMAL(12,2)</text>
+    <text x="12" y="178" class="field-text">   qt_estoque / qt_estoque_minimo</text>
+    <text x="12" y="196" class="field-text">   ds_unidade       VARCHAR(20)</text>
+    <text x="12" y="214" class="field-text">   pc_peso_kg / pc_altura_cm ...</text>
+    <text x="12" y="232" class="field-text">   ds_imagem_url    VARCHAR(500)</text>
+    <text x="12" y="250" class="field-text">   fl_ativo · dt_criacao · dt_atualizacao</text>
+  </g>
+
+  <!-- ── tb_promocao ── -->
+  <g transform="translate(1020, 920)" filter="url(#shadow)">
+    <rect width="280" height="220" rx="8" fill="#0d2137" stroke="#e65100" stroke-width="2"/>
+    <rect width="280" height="32" rx="8" fill="#e65100"/>
+    <rect y="24" width="280" height="8" fill="#e65100"/>
+    <text x="12" y="20" class="table-title">tb_promocao</text>
+    <text x="12" y="52"  class="field-pk">🔑 id_promocao       INT PK</text>
+    <text x="12" y="70"  class="field-text">   nm_promocao      VARCHAR(100)</text>
+    <text x="12" y="88"  class="field-text">   tp_desconto      ENUM</text>
+    <text x="12" y="106" class="field-text">   vl_desconto      DECIMAL(10,2)</text>
+    <text x="12" y="124" class="field-text">   dt_inicio / dt_fim   DATETIME</text>
+    <text x="12" y="142" class="field-text">   qt_uso_maximo / qt_uso_atual</text>
+    <text x="12" y="160" class="field-text">   vl_pedido_minimo  DECIMAL(12,2)</text>
+    <text x="12" y="178" class="field-text">   fl_ativo · dt_criacao</text>
+  </g>
+
+  <!-- ── tb_produto_promocao ── -->
+  <g transform="translate(640, 960)" filter="url(#shadow)">
+    <rect width="260" height="120" rx="8" fill="#0d2137" stroke="#e65100" stroke-width="2"/>
+    <rect width="260" height="32" rx="8" fill="#4a148c"/>
+    <rect y="24" width="260" height="8" fill="#4a148c"/>
+    <text x="12" y="20" class="table-title">tb_produto_promocao  (N:N)</text>
+    <text x="12" y="52"  class="field-pk">🔑🔗 id_produto      INT PK+FK</text>
+    <text x="12" y="70"  class="field-pk">🔑🔗 id_promocao     INT PK+FK</text>
+    <text x="12" y="88"  class="field-text">    dt_associacao   DATETIME</text>
+    <text x="12" y="108" class="table-subtitle">Chave composta (id_produto, id_promocao)</text>
+  </g>
+
+  <!-- ── tb_cliente ── -->
+  <g transform="translate(1150, 150)" filter="url(#shadow)">
+    <rect width="330" height="260" rx="8" fill="#0d2137" stroke="#00695c" stroke-width="2"/>
+    <rect width="330" height="32" rx="8" fill="#00695c"/>
+    <rect y="24" width="330" height="8" fill="#00695c"/>
+    <text x="12" y="20" class="table-title">tb_cliente</text>
+    <text x="12" y="52"  class="field-pk">🔑 id_cliente        INT PK</text>
+    <text x="12" y="70"  class="field-text">   nm_cliente       VARCHAR(100)</text>
+    <text x="12" y="88"  class="field-text">   ds_email         VARCHAR(100) UQ</text>
+    <text x="12" y="106" class="field-text">   ds_senha_hash    VARCHAR(255)</text>
+    <text x="12" y="124" class="field-text">   nr_cpf           CHAR(11) UQ</text>
+    <text x="12" y="142" class="field-text">   nr_cnpj          CHAR(14) UQ</text>
+    <text x="12" y="160" class="field-text">   tp_pessoa        ENUM(F,J)</text>
+    <text x="12" y="178" class="field-text">   dt_nascimento    DATE</text>
+    <text x="12" y="196" class="field-text">   nr_telefone / nr_celular</text>
+    <text x="12" y="214" class="field-text">   fl_ativo · fl_email_verificado</text>
+    <text x="12" y="232" class="field-text">   dt_criacao · dt_ultimo_acesso</text>
+  </g>
+
+  <!-- ── tb_endereco ── -->
+  <g transform="translate(1130, 560)" filter="url(#shadow)">
+    <rect width="300" height="235" rx="8" fill="#0d2137" stroke="#00695c" stroke-width="2"/>
+    <rect width="300" height="32" rx="8" fill="#004d40"/>
+    <rect y="24" width="300" height="8" fill="#004d40"/>
+    <text x="12" y="20" class="table-title">tb_endereco</text>
+    <text x="12" y="52"  class="field-pk">🔑 id_endereco       INT PK</text>
+    <text x="12" y="70"  class="field-fk">🔗 id_cliente        INT FK</text>
+    <text x="12" y="88"  class="field-text">   nm_destinatario  VARCHAR(100)</text>
+    <text x="12" y="106" class="field-text">   tp_endereco      ENUM</text>
+    <text x="12" y="124" class="field-text">   ds_rua / nr_numero</text>
+    <text x="12" y="142" class="field-text">   ds_complemento / nm_bairro</text>
+    <text x="12" y="160" class="field-text">   nm_cidade / sg_uf</text>
+    <text x="12" y="178" class="field-text">   nr_cep          CHAR(8)</text>
+    <text x="12" y="196" class="field-text">   fl_principal · fl_ativo</text>
+    <text x="12" y="214" class="field-text">   dt_criacao</text>
+  </g>
+
+  <!-- ── tb_carrinho ── -->
+  <g transform="translate(1700, 190)" filter="url(#shadow)">
+    <rect width="260" height="175" rx="8" fill="#0d2137" stroke="#f57f17" stroke-width="2"/>
+    <rect width="260" height="32" rx="8" fill="#f57f17"/>
+    <rect y="24" width="260" height="8" fill="#f57f17"/>
+    <text x="12" y="20" class="table-title">tb_carrinho</text>
+    <text x="12" y="52"  class="field-pk">🔑 id_carrinho       INT PK</text>
+    <text x="12" y="70"  class="field-fk">🔗 id_cliente        INT FK</text>
+    <text x="12" y="88"  class="field-fk">🔗 id_promocao       INT FK</text>
+    <text x="12" y="106" class="field-text">   fl_ativo         TINYINT(1)</text>
+    <text x="12" y="124" class="field-text">   dt_criacao       DATETIME</text>
+    <text x="12" y="142" class="field-text">   dt_atualizacao   DATETIME</text>
+    <text x="12" y="162" class="table-subtitle">0=convertido/abandonado 1=ativo</text>
+  </g>
+
+  <!-- ── tb_item_carrinho ── -->
+  <g transform="translate(1700, 430)" filter="url(#shadow)">
+    <rect width="280" height="180" rx="8" fill="#0d2137" stroke="#f57f17" stroke-width="2"/>
+    <rect width="280" height="32" rx="8" fill="#e65100"/>
+    <rect y="24" width="280" height="8" fill="#e65100"/>
+    <text x="12" y="20" class="table-title">tb_item_carrinho</text>
+    <text x="12" y="52"  class="field-pk">🔑 id_item_carrinho  INT PK</text>
+    <text x="12" y="70"  class="field-fk">🔗 id_carrinho       INT FK</text>
+    <text x="12" y="88"  class="field-fk">🔗 id_produto        INT FK</text>
+    <text x="12" y="106" class="field-text">   qt_item          INT</text>
+    <text x="12" y="124" class="field-text">   vl_unitario      DECIMAL(12,2)</text>
+    <text x="12" y="142" class="field-text">   dt_adicionado    DATETIME</text>
+    <text x="12" y="162" class="table-subtitle">UQ (id_carrinho, id_produto)</text>
+  </g>
+
+  <!-- ── tb_pedido ── -->
+  <g transform="translate(700, 1100)" filter="url(#shadow)">
+    <rect width="370" height="265" rx="8" fill="#0d2137" stroke="#c62828" stroke-width="2"/>
+    <rect width="370" height="32" rx="8" fill="#c62828"/>
+    <rect y="24" width="370" height="8" fill="#c62828"/>
+    <text x="12" y="20" class="table-title">tb_pedido</text>
+    <text x="12" y="52"  class="field-pk">🔑 id_pedido          INT PK</text>
+    <text x="12" y="70"  class="field-fk">🔗 id_cliente         INT FK</text>
+    <text x="12" y="88"  class="field-fk">🔗 id_endereco_entrega INT FK</text>
+    <text x="12" y="106" class="field-fk">🔗 id_endereco_cobranca INT FK</text>
+    <text x="12" y="124" class="field-fk">🔗 id_promocao        INT FK</text>
+    <text x="12" y="142" class="field-text">   nr_pedido         VARCHAR(20) UQ</text>
+    <text x="12" y="160" class="field-text">   st_pedido         ENUM (7 status)</text>
+    <text x="12" y="178" class="field-text">   vl_subtotal / vl_desconto</text>
+    <text x="12" y="196" class="field-text">   vl_frete / vl_total  DECIMAL(12,2)</text>
+    <text x="12" y="214" class="field-text">   ds_observacao     TEXT</text>
+    <text x="12" y="232" class="field-text">   dt_pedido · dt_atualizacao</text>
+  </g>
+
+  <!-- ── tb_item_pedido ── -->
+  <g transform="translate(290, 1420)" filter="url(#shadow)">
+    <rect width="310" height="210" rx="8" fill="#0d2137" stroke="#c62828" stroke-width="2"/>
+    <rect width="310" height="32" rx="8" fill="#880e4f"/>
+    <rect y="24" width="310" height="8" fill="#880e4f"/>
+    <text x="12" y="20" class="table-title">tb_item_pedido</text>
+    <text x="12" y="52"  class="field-pk">🔑 id_item_pedido    INT PK</text>
+    <text x="12" y="70"  class="field-fk">🔗 id_pedido         INT FK</text>
+    <text x="12" y="88"  class="field-fk">🔗 id_produto        INT FK</text>
+    <text x="12" y="106" class="field-text">   nr_sequencia     INT</text>
+    <text x="12" y="124" class="field-text">   qt_item          INT</text>
+    <text x="12" y="142" class="field-text">   vl_unitario      DECIMAL(12,2)</text>
+    <text x="12" y="160" class="field-text">   pc_desconto_item  DECIMAL(5,2)</text>
+    <text x="12" y="178" class="field-text">   vl_total_item    DECIMAL(12,2)</text>
+    <text x="12" y="196" class="table-subtitle">Snapshot de preço no momento da compra</text>
+  </g>
+
+  <!-- ── tb_pagamento ── -->
+  <g transform="translate(1270, 1100)" filter="url(#shadow)">
+    <rect width="310" height="255" rx="8" fill="#0d2137" stroke="#1565c0" stroke-width="2"/>
+    <rect width="310" height="32" rx="8" fill="#1565c0"/>
+    <rect y="24" width="310" height="8" fill="#1565c0"/>
+    <text x="12" y="20" class="table-title">tb_pagamento</text>
+    <text x="12" y="52"  class="field-pk">🔑 id_pagamento      INT PK</text>
+    <text x="12" y="70"  class="field-fk">🔗 id_pedido         INT FK</text>
+    <text x="12" y="88"  class="field-text">   tp_pagamento     ENUM (5 tipos)</text>
+    <text x="12" y="106" class="field-text">   st_pagamento     ENUM (5 status)</text>
+    <text x="12" y="124" class="field-text">   vl_pagamento     DECIMAL(12,2)</text>
+    <text x="12" y="142" class="field-text">   qt_parcelas      INT</text>
+    <text x="12" y="160" class="field-text">   ds_transacao_id  VARCHAR(100)</text>
+    <text x="12" y="178" class="field-text">   ds_bandeira      VARCHAR(50)</text>
+    <text x="12" y="196" class="field-text">   nr_cartao_final  CHAR(4)</text>
+    <text x="12" y="214" class="field-text">   dt_pagamento     DATETIME</text>
+    <text x="12" y="232" class="field-text">   dt_criacao · dt_atualizacao</text>
+  </g>
+
+  <!-- ── tb_frete ── -->
+  <g transform="translate(1550, 1030)" filter="url(#shadow)">
+    <rect width="310" height="270" rx="8" fill="#0d2137" stroke="#37474f" stroke-width="2"/>
+    <rect width="310" height="32" rx="8" fill="#37474f"/>
+    <rect y="24" width="310" height="8" fill="#37474f"/>
+    <text x="12" y="20" class="table-title">tb_frete</text>
+    <text x="12" y="52"  class="field-pk">🔑 id_frete          INT PK</text>
+    <text x="12" y="70"  class="field-fk">🔗 id_pedido         INT FK</text>
+    <text x="12" y="88"  class="field-text">   nm_transportadora VARCHAR(100)</text>
+    <text x="12" y="106" class="field-text">   tp_servico       VARCHAR(50)</text>
+    <text x="12" y="124" class="field-text">   nr_rastreamento  VARCHAR(50)</text>
+    <text x="12" y="142" class="field-text">   vl_frete         DECIMAL(12,2)</text>
+    <text x="12" y="160" class="field-text">   nr_prazo_dias    INT</text>
+    <text x="12" y="178" class="field-text">   st_frete         ENUM (6 status)</text>
+    <text x="12" y="196" class="field-text">   dt_postagem      DATETIME</text>
+    <text x="12" y="214" class="field-text">   dt_previsao / dt_entrega</text>
+    <text x="12" y="232" class="field-text">   ds_observacao    VARCHAR(255)</text>
+    <text x="12" y="250" class="field-text">   dt_criacao · dt_atualizacao</text>
+  </g>
+
+  <!-- ── tb_avaliacao ── -->
+  <g transform="translate(1700, 1420)" filter="url(#shadow)">
+    <rect width="300" height="220" rx="8" fill="#0d2137" stroke="#558b2f" stroke-width="2"/>
+    <rect width="300" height="32" rx="8" fill="#558b2f"/>
+    <rect y="24" width="300" height="8" fill="#558b2f"/>
+    <text x="12" y="20" class="table-title">tb_avaliacao</text>
+    <text x="12" y="52"  class="field-pk">🔑 id_avaliacao      INT PK</text>
+    <text x="12" y="70"  class="field-fk">🔗 id_produto        INT FK</text>
+    <text x="12" y="88"  class="field-fk">🔗 id_cliente        INT FK</text>
+    <text x="12" y="106" class="field-fk">🔗 id_pedido         INT FK</text>
+    <text x="12" y="124" class="field-text">   nr_nota          TINYINT (1-5)</text>
+    <text x="12" y="142" class="field-text">   ds_titulo        VARCHAR(100)</text>
+    <text x="12" y="160" class="field-text">   ds_comentario    TEXT</text>
+    <text x="12" y="178" class="field-text">   fl_verificado · fl_aprovado</text>
+    <text x="12" y="196" class="field-text">   dt_avaliacao     DATETIME</text>
+  </g>
+
+  <!-- ================================================================ -->
+  <!-- CONTAGEM DE TABELAS                                              -->
+  <!-- ================================================================ -->
+  <rect x="30" y="30" width="380" height="80" rx="8" fill="#16213e" stroke="#e94560" stroke-width="1"/>
+  <text x="45" y="52" font-size="13" fill="#fff" font-weight="bold">📊 Resumo do Modelo de Dados</text>
+  <text x="45" y="72" font-size="11" fill="#a0aec0">13 Tabelas · 14 Relacionamentos · ~90 Colunas</text>
+  <text x="45" y="90" font-size="11" fill="#a0aec0">Engine: InnoDB · Charset: utf8mb4 · Collate: utf8mb4_unicode_ci</text>
+
+</svg>
+</div>
+
+</body>
+</html>
